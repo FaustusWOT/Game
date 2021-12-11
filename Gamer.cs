@@ -8,9 +8,11 @@ namespace Game
     {
         public TColoda Cards;
         public bool ThrowCards;
+        public string sName;
 
-        public TGamer()
+        public TGamer(string pName)
         {
+            sName = pName;
             ThrowCards = false;
         }
 
@@ -38,11 +40,25 @@ namespace Game
         {
             Cards.DisplayColoda();
         }
+        public bool IsCorrectFirstColoda()
+        {
+            return Cards.IsCorrectFirstColoda();
+        }
+
+        public void DoEmptyHands()
+        {
+            Cards.DoEmpty();
+        }
+        public int getMinHigh(int iHigh)
+        {
+            return Cards.getMinHigh(iHigh);
+        }
+
     }
 
     class TMan : TGamer
     {
-        public TMan()
+        public TMan(string pName) : base(pName)
         {
             Cards = new TManColoda();
         }
@@ -81,7 +97,7 @@ namespace Game
 
     class THuman : TGamer
     {
-        public THuman ()
+        public THuman (string pName) : base(pName)
         {
             Cards = new THumanColoda();
         }

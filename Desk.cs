@@ -29,7 +29,9 @@ namespace Game
 
         public void GiveFirstCards()
         {
+            Console.WriteLine("Раздаю!!!");
             iHigh = -1;
+            GM.DoEmptyHands();
             for (int i = 0; i < GM.iGamersCount * 6;i++)           
             {
                 if (MainCards.iCardCount == 1) iHigh = MainCards.GetHigh();
@@ -53,6 +55,7 @@ namespace Game
                     {
                         GM.CurrentGamer.GetCard(MainCards.GetLast());
                     }
+                    else break;
                 }
                 GM.GoNextGamer();
             } while (GM.CurrentGamer != Current);
@@ -89,6 +92,14 @@ namespace Game
         {
 
             return GM.NGamer.GetSecondMove(CardOnDesk,iHigh);
+        }
+        public bool isCorrectFirstColoda()
+        {
+            return GM.IsCorrectFirstColoda();
+        }
+        public void SelectFirstGamer()
+        {
+            GM.SelectFirstGamer(iHigh);
         }
     }
 }

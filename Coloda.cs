@@ -52,6 +52,31 @@ namespace Game
         }
         public virtual void DisplayColoda() { }
 
+        public bool IsCorrectFirstColoda()
+        {
+            int[] C;
+
+            C = new int[4];
+            for (int i= 0;i < iCardCount;i++) C[Data[i].iMast]++;
+
+            foreach (int D in C)
+                if (D > 4) return false;
+            return true;
+        }
+        public void DoEmpty()
+        {
+            iCardCount = 0;
+        }
+        public int getMinHigh(int iHigh)
+        {
+            int iC = 15;
+            for (int i=0;i < iCardCount;i++)
+                if (Data[i].iMast == iHigh)
+                {
+                    if (Data[i].iVal < iC) iC = Data[i].iVal;
+                }
+            return iC;
+        }
     }
 
     class TMainColoda : TColoda
@@ -86,6 +111,7 @@ namespace Game
 
         public void Make()
         {
+            iCardCount = 0;
             for (int i = 0; i < 4; i++)
                 for (int j = 6; j <= 14; j++)
                     PutIn(new TCard(i, j));

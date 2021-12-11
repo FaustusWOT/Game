@@ -13,13 +13,21 @@ namespace Game
             Console.WriteLine("Игра в дурака!");
             TDesk Desk = new TDesk();
 
-            Desk.AddGamer(new THuman());
-            Desk.AddGamer(new TMan());
+            Desk.AddGamer(new TMan("Джон"));
+            Desk.AddGamer(new TMan("Билл"));
+            Desk.AddGamer(new TMan("Гарри"));
+            Desk.AddGamer(new TMan("Гермиона"));
 
-            Desk.PrepareCards();
+            do
+            {
+                Desk.PrepareCards();
 
-            Desk.GiveFirstCards();
 
+                Desk.GiveFirstCards();
+
+            } while (!Desk.isCorrectFirstColoda());
+
+            Desk.SelectFirstGamer();
             // Начало игрового цикла
             do
             {
@@ -33,27 +41,34 @@ namespace Game
                     Console.WriteLine("Игрок бросил карты!");
                     break;
                 }
-                Console.WriteLine("Захожу {0:s}", CardOnDesk.ToString());
+                Console.WriteLine("{0:s}: Захожу {1:s}", Desk.GM.CurrentGamer.sName, CardOnDesk.ToString());
                 ACard = Desk.getSecondMove(CardOnDesk);
                 if (Desk.GM.GamerStand())
                 {
-                    Console.WriteLine("Игрок бросил карты!");
+                    Console.WriteLine("{0:s} бросил карты!", Desk.GM.CurrentGamer.sName);
                     break;
                 }
                 if (ACard == null)
                 {
-                    Console.WriteLine("Принимаю!");
+                    Console.WriteLine("{0:s}: Принимаю!", Desk.GM.NGamer.sName);
                     Desk.GM.NGamer.GetCard(CardOnDesk);
                     Desk.AddCards();
                 }
                 else
                 {
-                    Console.WriteLine("Отбиваю {0:s}!", ACard.ToString());
+                    Console.WriteLine("{0:s}: Отбиваю {1:s}!", Desk.GM.NGamer.sName, ACard.ToString());
                     Desk.AddCards();
                     Desk.GM.GoNextGamer();
                 }
-
+                Desk.GM.DeleteGamersWhoGameIsDone();
             } while (!Desk.GameIsDone());
+            if (!Desk.GM.GamerStand())
+            {
+                if (Desk.GM.iGamersCount > 0)
+                    Console.WriteLine("{0:s} - проиграл!", Desk.GM.G[0].sName);
+                else
+                    Console.WriteLine("Розыгрыш!!!");
+            }
 
             Console.WriteLine("Конец программы...");
         }

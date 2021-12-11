@@ -24,8 +24,10 @@ namespace Game
 
         public void RemoveGamer(int iIndex)
         {
+            if (iCurrent > iIndex) iCurrent--; 
             for (int i = iIndex; i < iGamersCount; i++) G[i] = G[i + 1];
             iGamersCount--;
+            if (iCurrent > iGamersCount) iCurrent = 0;
         }
 
         public int NextGamer()
@@ -51,13 +53,13 @@ namespace Game
                 {
                     if (i != iCurrent)
                     {
-                        Console.WriteLine("Игрок N {0:d}", i);
+                        Console.WriteLine("Игрок {0:s}", G[i].sName);
                         G[i].DisplayColoda();
                     } 
                 }
             } else
             {
-                Console.WriteLine("Текущий игрок:");
+                Console.WriteLine("Текущий игрок ({0:s}):",CurrentGamer.sName);
                 CurrentGamer.DisplayColoda();
             }
         }
@@ -79,6 +81,46 @@ namespace Game
                 if (G[i].ThrowCards) return true;
             }
             return false;
+        }
+        public void DeleteGamersWhoGameIsDone()
+        {
+            for (int i = 0;i < iGamersCount;)
+            {
+                if (G[i].GameIsDone())
+                    RemoveGamer(i);
+                else
+                    i++;
+            }
+        }
+        public bool IsCorrectFirstColoda()
+        {
+            for (int i = 0; i < iGamersCount; i++)
+                if (!G[i].IsCorrectFirstColoda()) return false;
+            return true;
+        }
+        public void DoEmptyHands()
+        {
+            for (int i=0;i<iGamersCount;i++) G[i].DoEmptyHands();
+        }
+        public void SelectFirstGamer(int iHigh)
+        {
+            int iC=-1, iV=15,iT;
+            for (int i=0;i < iGamersCount;i++)
+            {
+                iT = G[i].getMinHigh(iHigh);
+                Console.WriteLine("{0:s} сказал \"У меня {1:d}!", G[i].sName, iT);
+                if (iT < iV)
+                {
+                    iC = i;
+                    iV = iT;
+                }
+            }
+            if (iV < 15)
+            {
+                iCurrent = iC;
+                Console.WriteLine("Ходит {0:s}, у него {1:d}!", CurrentGamer.sName, iV);
+            }
+
         }
     }
 }
