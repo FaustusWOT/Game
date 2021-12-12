@@ -38,6 +38,7 @@ namespace Game
         public void GoNextGamer()
         {
             iCurrent = NextGamer();
+//            Console.WriteLine("Теперь ходит {0:s}", CurrentGamer.sName);
         }
 
         public bool GameIsDone()
@@ -87,7 +88,10 @@ namespace Game
             for (int i = 0;i < iGamersCount;)
             {
                 if (G[i].GameIsDone())
+                {
+                    Console.WriteLine("Игрок {0:s} вышел!",G[i].sName);
                     RemoveGamer(i);
+                }
                 else
                     i++;
             }

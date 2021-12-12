@@ -77,6 +77,18 @@ namespace Game
                 }
             return iC;
         }
+        public void GetCards(TColoda Coloda)
+        {
+            for (int i = 0; i < Coloda.iCardCount; i++)
+                PutIn(Coloda.Data[i]);
+        }
+        public bool CanSecond(TCard Card,int iHigh)
+        {
+            for (int i = 0; i < iCardCount; i++)
+                if (Data[i].iVal == Card.iVal) return true;
+            return false;
+        }
+
     }
 
     class TMainColoda : TColoda

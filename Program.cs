@@ -7,13 +7,12 @@ namespace Game
         static void Main(string[] args)
         {
             int iMoveCount = 0;
-            TCard CardOnDesk;
             TCard ACard;
 
             Console.WriteLine("Игра в дурака!");
             TDesk Desk = new TDesk();
 
-            Desk.AddGamer(new TMan("Джон"));
+            Desk.AddGamer(new THuman("Джон"));
             Desk.AddGamer(new TMan("Билл"));
             Desk.AddGamer(new TMan("Гарри"));
             Desk.AddGamer(new TMan("Гермиона"));
@@ -35,32 +34,56 @@ namespace Game
 
                 Desk.DisplayPosition();
 
-                CardOnDesk = Desk.getMove();
+                Desk.getFirstMove();
                 if (Desk.GM.GamerStand())
                 {
                     Console.WriteLine("Игрок бросил карты!");
                     break;
                 }
-                Console.WriteLine("{0:s}: Захожу {1:s}", Desk.GM.CurrentGamer.sName, CardOnDesk.ToString());
-                ACard = Desk.getSecondMove(CardOnDesk);
+                Console.WriteLine("{0:s}: Захожу {1:s}", Desk.GM.CurrentGamer.sName, Desk.CardOnMove.ToString());
+
+                ACard = null;
+                bool isMoveDone = false;
+
+                while (Desk.getAnsverMove())
+                {
+                    ACard = Desk.GetSecondMove();
+                    if (ACard != null)
+                    {
+                        Desk.CardOnMove = ACard;
+                    }
+                    else
+                    {
+                        isMoveDone = true;
+                        break;
+                    }
+                }
+                if (!isMoveDone)
+                {
+                    Desk.GM.GoNextGamer();
+                }
+                Desk.GM.GoNextGamer();
+
                 if (Desk.GM.GamerStand())
                 {
                     Console.WriteLine("{0:s} бросил карты!", Desk.GM.CurrentGamer.sName);
                     break;
                 }
-                if (ACard == null)
-                {
-                    Console.WriteLine("{0:s}: Принимаю!", Desk.GM.NGamer.sName);
-                    Desk.GM.NGamer.GetCard(CardOnDesk);
-                    Desk.AddCards();
-                }
-                else
-                {
-                    Console.WriteLine("{0:s}: Отбиваю {1:s}!", Desk.GM.NGamer.sName, ACard.ToString());
-                    Desk.AddCards();
-                    Desk.GM.GoNextGamer();
-                }
+                /*                if (ACard == null)
+                                {
+                                    Console.WriteLine("{0:s}: Принимаю!", Desk.GM.NGamer.sName);
+                                    Desk.GM.NGamer.GetCard(CardOnDesk);
+                                    Desk.AddCards();
+                                }
+                                else
+                                {
+                                    Console.WriteLine("{0:s}: Отбиваю {1:s}!", Desk.GM.NGamer.sName, ACard.ToString());
+                                    Desk.AddCards();
+                                    Desk.GM.GoNextGamer();
+                                }*/
+                Desk.AddCards();
                 Desk.GM.DeleteGamersWhoGameIsDone();
+                Console.WriteLine("Теперь ходит {0:s}", Desk.GM.CurrentGamer.sName);
             } while (!Desk.GameIsDone());
             if (!Desk.GM.GamerStand())
             {

@@ -23,8 +23,10 @@ namespace Game
         }
 
         public abstract void DisplayTakenCard(TCard TakenCard);
-        public abstract TCard GetFirstMove();
-        public abstract TCard GetSecondMove(TCard DeskCard, int iHigh);
+        public abstract TCard GetFirstMove(int iHigh);
+        public abstract TCard GetSecondMove(TColoda CardsOnDesk, int iHigh);
+        public abstract TCard GetAnsverMove(TCard DeskCard, int iHigh);
+
 
         public bool GameIsDone ()
         {
@@ -53,7 +55,10 @@ namespace Game
         {
             return Cards.getMinHigh(iHigh);
         }
-
+        public void GetCards(TColoda Coloda)
+        {
+            Cards.GetCards(Coloda);
+        }
     }
 
     class TMan : TGamer
@@ -62,11 +67,35 @@ namespace Game
         {
             Cards = new TManColoda();
         }
-        public override TCard GetFirstMove()
+        public override TCard GetFirstMove(int iHigh)
         {
             return Cards.GetRandomCard();
         }
-        public override TCard GetSecondMove(TCard DeskCard, int iHigh)
+        public override TCard GetSecondMove(TColoda CardsOnDesk,int iHigh)
+        {
+            int[] SelCards = new int[52];
+            int iCount = 0;
+
+            for (int i = 0; i < Cards.iCardCount; i++)
+            {
+                if (Cards.Data[i].CanSecond(CardsOnDesk, iHigh))
+                {
+                    SelCards[iCount++] = i;
+                }
+            }
+
+            if (iCount == 0)
+            {
+                return null;
+            }
+            else
+            {
+                Random rand = new Random();
+                return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
+            }
+        }
+
+        public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
         {
             int[] SelCards = new int[52];
             int iCount = 0;
@@ -105,6 +134,7 @@ namespace Game
         private int? GetHumanEnter()
         {
             int i;
+            Cards.DisplayColoda();
             do
             {
                 string S = Console.ReadLine();
@@ -138,7 +168,7 @@ namespace Game
             return i;
         }
 
-        public override TCard GetFirstMove()
+        public override TCard GetFirstMove(int iHigh)
         {
             int? i = GetHumanEnter();
 
@@ -148,9 +178,24 @@ namespace Game
                 return null;
             }
 
-            return (i > 0)?Cards.GetFrom(i.Value - 1):null;
+            return (i > 0) ? Cards.GetFrom(i.Value - 1) : null;
+        }
+        public override TCard GetSecondMove(TColoda CardsOnDesk,int iHigh)
+        {
+            int? i = GetHumanEnter();
+
+            if (i == null)
+            {
+                ThrowCards = true;
+                return null;
             }
-        public override TCard GetSecondMove(TCard DeskCard, int iHigh)
+            TCard ACard = (i > 0) ? Cards.GetFrom(i.Value - 1) : null;
+            if (ACard == null) return null;
+
+            return (CardsOnDesk.CanSecond(ACard, iHigh)) ? ACard : null; 
+        }
+
+        public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
         {
             int? iIndex = GetHumanEnter();
 

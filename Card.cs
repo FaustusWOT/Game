@@ -35,13 +35,17 @@ namespace Game
             }
             return S;
         }
-        public bool CanTake (TCard D,int iHigh)
+        public bool CanTake(TCard D, int iHigh)
         {
             if ((iMast == iHigh) & !(D.iMast == iHigh)) return true;
             if (!(iMast == iHigh) & (D.iMast == iHigh)) return false;
             if (iMast != D.iMast) return false;
             return (iVal > D.iVal);
 
+        }
+        public bool CanSecond(TColoda CardsOnDesk, int iHigh)
+        {
+            return CardsOnDesk.CanSecond(this, iHigh);
         }
     }
 }
