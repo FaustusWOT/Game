@@ -12,7 +12,7 @@ namespace Game
             Console.WriteLine("Игра в дурака!");
             TDesk Desk = new TDesk();
 
-            Desk.AddGamer(new THuman("Джон"));
+            Desk.AddGamer(new TMan("Джон"));
             Desk.AddGamer(new TMan("Билл"));
             Desk.AddGamer(new TMan("Гарри"));
             Desk.AddGamer(new TMan("Гермиона"));

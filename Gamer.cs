@@ -35,7 +35,7 @@ namespace Game
 
         public bool NeedCard()
         {
-            return Cards.iCardCount < 6;
+            return Cards.NeedCard();
         }
 
         public void DisplayColoda()
@@ -71,51 +71,67 @@ namespace Game
         {
             return Cards.GetRandomCard();
         }
+
         public override TCard GetSecondMove(TColoda CardsOnDesk,int iHigh)
         {
-            int[] SelCards = new int[52];
-            int iCount = 0;
+            /*            TColoda SelCards = new TColoda();
+                        int iCount = 0;
 
-            for (int i = 0; i < Cards.iCardCount; i++)
-            {
-                if (Cards.Data[i].CanSecond(CardsOnDesk, iHigh))
-                {
-                    SelCards[iCount++] = i;
-                }
-            }
+                        for (int i = 0; i < Cards.iCardCount; i++)
+                        {
+                            if (Cards.Data[i].CanSecond(CardsOnDesk, iHigh))
+                            {
+                                SelCards[iCount++] = i;
+                            }
+                        }
 
-            if (iCount == 0)
-            {
-                return null;
-            }
-            else
-            {
-                Random rand = new Random();
-                return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
-            }
+                        if (iCount == 0)
+                        {
+                            return null;
+                        }
+                        else
+                        {
+                            Random rand = new Random();
+                            return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
+                        }*/
+            Random rand = new Random();
+
+            TColoda? SelCards = Cards.GetSecondMoveCards(CardsOnDesk, iHigh);
+
+            TCard? SelCard = (SelCards != null)?SelCards.GetRandomCard():null;
+
+            return Cards.GetFrom(SelCard);
         }
 
         public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
         {
-            int[] SelCards = new int[52];
-            int iCount = 0;
+            /*            int[] SelCards = new int[52];
+                        int iCount = 0;
 
-            for (int i = 0;i < Cards.iCardCount; i++)
-            {
-                if (Cards.Data[i].CanTake(DeskCard,iHigh))
-                {
-                    SelCards[iCount++] = i;
-                }
-            }
-            
-            if (iCount == 0)
-            {
-                return null;
-            } else
-            {
-                Random rand = new Random();
-                return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
-            }
+                        for (int i = 0;i < Cards.iCardCount; i++)
+                        {
+                            if (Cards.Data[i].CanTake(DeskCard,iHigh))
+                            {
+                                SelCards[iCount++] = i;
+                            }
+                        }
+
+                        if (iCount == 0)
+                        {
+                            return null;
+                        } else
+                        {
+                            Random rand = new Random();
+                            return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
+                        }
+            */
+            Random rand = new Random();
+
+            TColoda? SelCards = Cards.GetAnsverMoveCards(DeskCard, iHigh);
+
+            TCard? SelCard = (SelCards != null) ? SelCards.GetRandomCard() : null;
+
+            return Cards.GetFrom(SelCard);
 
         }
         public override void DisplayTakenCard(TCard TakenCard)
@@ -206,7 +222,7 @@ namespace Game
             }
             if (iIndex == 0) return null;
 
-            if (Cards.Data[iIndex.Value].CanTake(DeskCard, iHigh))
+            if (Cards.CanTake(iIndex.Value,DeskCard, iHigh))
             {
                 return Cards.GetFrom(iIndex.Value-1);
             }
