@@ -7,32 +7,32 @@ namespace Game
     class TGamers
     {
         public int iCurrent;
-        public TGamer[] G;
-        public int iGamersCount;
+        public List<TGamer> Gamers;
+//        public int iGamersCount;
 
         public TGamers()
         {
-            G = new TGamer[6];
+            Gamers = new List<TGamer>();
             iCurrent = 0;
-            iGamersCount = 0;
         }
 
         public void AddGamer(TGamer D)
         {
-            G[iGamersCount++] = D;
+            Gamers.Add(D);
         }
 
         public void RemoveGamer(int iIndex)
         {
-            if (iCurrent > iIndex) iCurrent--; 
-            for (int i = iIndex; i < iGamersCount; i++) G[i] = G[i + 1];
-            iGamersCount--;
-            if (iCurrent > iGamersCount) iCurrent = 0;
+            if (iCurrent > iIndex) iCurrent--;
+
+            Gamers.RemoveAt(iIndex);
+
+            if (iCurrent >= Gamers.Count) iCurrent = 0;
         }
 
         public int NextGamer()
         {
-            return ((iCurrent+1) < iGamersCount)? iCurrent+1:0;
+            return ((iCurrent+1) < Gamers.Count)?iCurrent+1:0;
         }
 
         public void GoNextGamer()
@@ -43,19 +43,19 @@ namespace Game
 
         public bool GameIsDone()
         {
-            return (iGamersCount <= 1);
+            return (Gamers.Count <= 1);
         }
 
         public void DisplayColoda(int iMode ) // 0 - других игроков, 1- текущего игрока
         {
             if (iMode == 0)
             {
-                for(int i = 0; i < iGamersCount;i++)
+                for(int i = 0; i < Gamers.Count;i++)
                 {
                     if (i != iCurrent)
                     {
-                        Console.WriteLine("Игрок {0:s}", G[i].sName);
-                        G[i].DisplayColoda();
+                        Console.WriteLine("Игрок {0:s}", Gamers[i].sName);
+                        Gamers[i].DisplayColoda();
                     } 
                 }
             } else
@@ -67,62 +67,78 @@ namespace Game
 
         public TGamer CurrentGamer
         {
-            get { return G[iCurrent]; }
+            get { return Gamers[iCurrent]; }
             set {; }
         }
         public TGamer NGamer
         {
-            get { return G[NextGamer()]; }
+            get { return Gamers[NextGamer()]; }
             set {; }
         }
         public bool GamerStand ()
         {
-            for (int i = 0; i < iGamersCount; i++) 
-            {
-                if (G[i].ThrowCards) return true;
-            }
-            return false;
+            return Gamers.Exists(x => x.ThrowCards);
         }
+
         public void DeleteGamersWhoGameIsDone()
         {
-            for (int i = 0;i < iGamersCount;)
+            int iIndex;
+            while ((iIndex = Gamers.FindIndex(x => x.GameIsDone())) >= 0) 
             {
-                if (G[i].GameIsDone())
-                {
-                    Console.WriteLine("Игрок {0:s} вышел!",G[i].sName);
-                    RemoveGamer(i);
-                }
-                else
-                    i++;
+                Console.WriteLine("Игрок {0:s} вышел!", Gamers[iIndex].sName);
+                RemoveGamer(iIndex);
             }
+
         }
         public bool IsCorrectFirstColoda()
         {
-            for (int i = 0; i < iGamersCount; i++)
-                if (!G[i].IsCorrectFirstColoda()) return false;
-            return true;
+            return !Gamers.Exists(x => !(x.IsCorrectFirstColoda()));
         }
+
         public void DoEmptyHands()
         {
-            for (int i=0;i<iGamersCount;i++) G[i].DoEmptyHands();
+            foreach (TGamer Gamer in Gamers) Gamer.DoEmptyHands();
         }
+
         public void SelectFirstGamer(int iHigh)
         {
-            int iC=-1, iV=15,iT;
-            for (int i=0;i < iGamersCount;i++)
+            int iV=15,iT;
+            TGamer? iC=null;
+
+            foreach (TGamer Gamer in Gamers) 
             {
-                iT = G[i].getMinHigh(iHigh);
-                Console.WriteLine("{0:s} сказал \"У меня {1:d}!", G[i].sName, iT);
+                iT = Gamer.getMinHigh(iHigh);
+                Console.WriteLine("{0:s} сказал \"У меня {1:d}!", Gamer.sName, iT);
+
                 if (iT < iV)
                 {
-                    iC = i;
+                    iC = Gamer;
                     iV = iT;
                 }
             }
+
             if (iV < 15)
             {
-                iCurrent = iC;
+                iCurrent = Gamers.FindIndex(x => (x.sName == iC.sName));
                 Console.WriteLine("Ходит {0:s}, у него {1:d}!", CurrentGamer.sName, iV);
+            }
+
+        }
+        public bool isGameDone
+        {
+            get { return (Gamers.Count <= 1); }
+        }
+
+        public void GetNeedCards(TColoda Coloda)
+        {
+            if (Gamers.Count > 0)
+            {
+                for (int i = 0; i < Gamers.Count; i++)
+                {
+                    while (CurrentGamer.NeedCard() && !(Coloda.isEmpty())) CurrentGamer.GetCard(Coloda.GetLast());
+
+                    GoNextGamer();
+                }
             }
 
         }

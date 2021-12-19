@@ -48,7 +48,7 @@ namespace Game
             else return null;
         }
 
-        public TCard GetLast()
+        public TCard? GetLast()
         {
             /*            if (iCardCount != 0)
                         {
@@ -169,6 +169,32 @@ namespace Game
         {
             return Cards[iIndex].CanTake(Card, iHigh);
         }
+
+        public TCard? SelectMinCard (int iHigh)
+        {
+            TCard? Card = null;
+            foreach (TCard C in Cards)
+            {
+                if (Card == null)
+                {
+                    Card = C;
+                }
+                else
+                {
+                    if (!C.isHigh(iHigh) & (Card.isHigh(iHigh))) {
+                        Card = C;
+                    }
+                    else if ((C.isHigh(iHigh) & Card.isHigh(iHigh)) | (!C.isHigh(iHigh) & !Card.isHigh(iHigh)))
+                    {
+                        if (C.iVal < Card.iVal)
+                        {
+                            Card = C;
+                        }
+                    }
+                }
+            }
+            return Card;
+        }
     }
 
     class TMainColoda : TColoda
@@ -244,23 +270,15 @@ namespace Game
     {
         public override void DisplayColoda()
         {
-            //            base.DisplayColoda();
-
-            /*           if (iCardCount > 0)
-                       {
-                           Console.WriteLine("Колода ");
-
-                           string S = "";
-
-                           for (int i = 0; i < iCardCount; i++) S += "#";
-
-                           Console.WriteLine(S);
-                       }
-                       else Console.WriteLine("Карт нет.");
-
-                   }
-           */
             if (!isEmpty())
+            {
+                Console.WriteLine("Колода ");
+
+                for (int i = 0; i < Cards.Count; i++) Console.WriteLine((i + 1).ToString() + " " + Cards[i].ToString());
+
+            }
+            else Console.WriteLine("Карт нет.");
+/*            if (!isEmpty())
             {
                 Console.WriteLine("Колода ");
 
@@ -270,7 +288,7 @@ namespace Game
 
                 Console.WriteLine(S);
             }
-            else Console.WriteLine("Карт нет.");
+            else Console.WriteLine("Карт нет.");*/
 
         }
     }

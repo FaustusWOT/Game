@@ -34,16 +34,11 @@ namespace Game
         public void GiveFirstCards()
         {
             Console.WriteLine("Раздаю!!!");
-            iHigh = -1;
-            GM.DoEmptyHands();
-            for (int i = 0; i < GM.iGamersCount * 6;i++)           
-            {
-                if (MainCards.iCardCount == 1) iHigh = MainCards.GetHigh();
 
-                GM.CurrentGamer.GetCard(MainCards.GetFrom(MainCards.iCardCount - 1));
-                GM.GoNextGamer();
-            }
-            if (iHigh < 0) iHigh = MainCards.GetHigh();
+            iHigh = MainCards.GetHigh();
+            GM.DoEmptyHands();
+            GM.GetNeedCards(MainCards);
+
         }
 
         public void AddCards()
@@ -105,15 +100,15 @@ namespace Game
             {
                 if (iTempStore != GM.NextGamer())
                 {
-                    ACard = GM.G[iTempStore].GetSecondMove(CardsOnDesk,iHigh);
+                    ACard = GM.Gamers[iTempStore].GetSecondMove(CardsOnDesk,iHigh);
                     if (ACard != null)
                     {
-                        Console.WriteLine("{0:s}: Подкидываю {1:s}", GM.G[iTempStore].sName, ACard.ToString());
+                        Console.WriteLine("{0:s}: Подкидываю {1:s}", GM.Gamers[iTempStore].sName, ACard.ToString());
                         return ACard;
                     }
                 }
                 iTempStore++;
-                if (iTempStore >= GM.iGamersCount) iTempStore = 0;
+                if (iTempStore >= GM.Gamers.Count) iTempStore = 0;
             } while (iTempStore != GM.iCurrent);
 
             Console.WriteLine("{0:s}: Бито!!!", GM.CurrentGamer.sName);
@@ -147,6 +142,81 @@ namespace Game
         public void SelectFirstGamer()
         {
             GM.SelectFirstGamer(iHigh);
+        }
+
+        public void GameCycle()
+        {
+            int iMoveCount = 0;
+
+            do
+            {
+                PrepareCards();
+
+
+                GiveFirstCards();
+
+            } while (!isCorrectFirstColoda());
+
+            SelectFirstGamer();
+            // Начало игрового цикла
+            do
+            {
+                Console.WriteLine("Ход номер {0:d}", ++iMoveCount);
+
+                DisplayPosition();
+
+                getFirstMove();
+                if (GM.GamerStand())
+                {
+                    Console.WriteLine("Игрок бросил карты!");
+                    break;
+                }
+                Console.WriteLine("{0:s}: Захожу {1:s}", GM.CurrentGamer.sName, CardOnMove.ToString());
+
+                TCard ACard = null;
+                bool isMoveDone = false;
+
+                while (getAnsverMove())
+                {
+                    ACard = GetSecondMove();
+                    if (ACard != null)
+                    {
+                        CardOnMove = ACard;
+                    }
+                    else
+                    {
+                        isMoveDone = true;
+                        break;
+                    }
+                }
+                if (!isMoveDone)
+                {
+                    GM.GoNextGamer();
+                }
+                GM.GoNextGamer();
+
+                if (GM.GamerStand())
+                {
+                    Console.WriteLine("{0:s} бросил карты!", GM.CurrentGamer.sName);
+                    break;
+                }
+                /*                if (ACard == null)
+                                {
+                                    Console.WriteLine("{0:s}: Принимаю!", Desk.GM.NGamer.sName);
+                                    Desk.GM.NGamer.GetCard(CardOnDesk);
+                                    Desk.AddCards();
+                                }
+                                else
+                                {
+                                    Console.WriteLine("{0:s}: Отбиваю {1:s}!", Desk.GM.NGamer.sName, ACard.ToString());
+                                    Desk.AddCards();
+                                    Desk.GM.GoNextGamer();
+                                }*/
+                AddCards();
+                GM.DeleteGamersWhoGameIsDone();
+                Console.WriteLine("Теперь ходит {0:s}", GM.CurrentGamer.sName);
+            } while (!GameIsDone());
+
         }
     }
 }

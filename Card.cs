@@ -47,5 +47,6 @@ namespace Game
         {
             return CardsOnDesk.CanSecond(this, iHigh);
         }
+        public bool isHigh(int iHigh) { return iHigh == iMast; }
     }
 }
