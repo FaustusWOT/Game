@@ -6,6 +6,8 @@ namespace Game
 {
     class TDesk
     {
+        private readonly TLog MainLog;
+
         public TMainColoda MainCards;
         public TGamers GM;
         public int iHigh;
@@ -13,10 +15,11 @@ namespace Game
         public TColoda CardsOnDesk;
         public TCard CardOnMove;
 
-        public TDesk()
+        public TDesk(ref TLog setMainLog)
         {
+            MainLog = setMainLog;
             MainCards = new TMainColoda();
-            GM = new TGamers();
+            GM = new TGamers(ref MainLog);
             CardsOnDesk = new TColoda();
         }
 
@@ -33,7 +36,7 @@ namespace Game
 
         public void GiveFirstCards()
         {
-            Console.WriteLine("Раздаю!!!");
+            MainLog.DisplayFirst();
 
             iHigh = MainCards.GetHigh();
             GM.DoEmptyHands();
@@ -50,7 +53,7 @@ namespace Game
             {
                 while (GM.CurrentGamer.NeedCard())
                 {
-                    if (!MainCards.isEmpty())
+                    if (!MainCards.IsEmpty())
                     {
                         GM.CurrentGamer.GetCard(MainCards.GetLast());
                     }
@@ -68,22 +71,22 @@ namespace Game
         }
         public bool GameIsDone()
         {
-            if (!MainCards.isEmpty()) return false;
+            if (!MainCards.IsEmpty()) return false;
             return GM.GameIsDone();
         }
 
         public void DisplayPosition()
         {
-            Console.WriteLine("Колода на столе:");
-            MainCards.DisplayColoda();
+            MainLog.DisplayPosition("Колода на столе:",MainCards,TColodaType.IS_DESK_COLODA);
 
-            Console.WriteLine("Колоды у других игроков");
+            MainLog.DisplayMessage("Колоды у других игроков");
             GM.DisplayColoda(0);
 
-            Console.WriteLine("Колода текущего игрока");
+            MainLog.DisplayMessage("Колода текущего игрока");
             GM.DisplayColoda(1);
         }
-        public void getFirstMove()
+
+        public void GetFirstMove()
         {
             CardsOnDesk.DoEmpty();
             CardOnMove =  GM.CurrentGamer.GetFirstMove(iHigh);
@@ -92,7 +95,7 @@ namespace Game
         {
             int iTempStore;
 
-            TCard ACard=null;
+            TCard ACard;
 
             iTempStore = GM.iCurrent;
 
@@ -103,7 +106,7 @@ namespace Game
                     ACard = GM.Gamers[iTempStore].GetSecondMove(CardsOnDesk,iHigh);
                     if (ACard != null)
                     {
-                        Console.WriteLine("{0:s}: Подкидываю {1:s}", GM.Gamers[iTempStore].sName, ACard.ToString());
+                        MainLog.SecondMove(GM.Gamers[iTempStore].sName, ACard.ToString());
                         return ACard;
                     }
                 }
@@ -111,23 +114,23 @@ namespace Game
                 if (iTempStore >= GM.Gamers.Count) iTempStore = 0;
             } while (iTempStore != GM.iCurrent);
 
-            Console.WriteLine("{0:s}: Бито!!!", GM.CurrentGamer.sName);
+            MainLog.SecondMove(GM.CurrentGamer.sName,null);
 
             return null;
         }
-        public bool getAnsverMove()
+        public bool GetAnsverMove()
         {
             TCard ACard;
             ACard = GM.NGamer.GetAnsverMove(CardOnMove,iHigh);
             if (ACard != null)
             {
-                Console.WriteLine("{0:s}: Отбиваю {1:s}!", GM.NGamer.sName, ACard.ToString());
+                MainLog.AnsverMove(GM.NGamer.sName, ACard.ToString());
                 CardsOnDesk.PutIn(CardOnMove);
                 CardsOnDesk.PutIn(ACard);
                 return true;
             } else
             {
-                Console.WriteLine("{0:s}: Принимаю!", GM.NGamer.sName);
+                MainLog.AnsverMove(GM.NGamer.sName, null);
                 GM.NGamer.GetCard(CardOnMove);
                 GM.NGamer.GetCards(CardsOnDesk);
                 CardsOnDesk.DoEmpty();
@@ -135,7 +138,7 @@ namespace Game
                 return false;
             }
         }
-        public bool isCorrectFirstColoda()
+        public bool IsCorrectFirstColoda()
         {
             return GM.IsCorrectFirstColoda();
         }
@@ -155,28 +158,28 @@ namespace Game
 
                 GiveFirstCards();
 
-            } while (!isCorrectFirstColoda());
+            } while (!IsCorrectFirstColoda());
 
             SelectFirstGamer();
             // Начало игрового цикла
             do
             {
-                Console.WriteLine("Ход номер {0:d}", ++iMoveCount);
+                MainLog.DisplayMessage(String.Format("Ход номер {0:d}", ++iMoveCount));
 
                 DisplayPosition();
 
-                getFirstMove();
+                GetFirstMove();
                 if (GM.GamerStand())
                 {
-                    Console.WriteLine("Игрок бросил карты!");
+                    MainLog.FirstMove("", null);
                     break;
                 }
-                Console.WriteLine("{0:s}: Захожу {1:s}", GM.CurrentGamer.sName, CardOnMove.ToString());
+                MainLog.FirstMove( GM.CurrentGamer.sName, CardOnMove.ToString());
 
-                TCard ACard = null;
+                TCard ACard;
                 bool isMoveDone = false;
 
-                while (getAnsverMove())
+                while (GetAnsverMove())
                 {
                     ACard = GetSecondMove();
                     if (ACard != null)
@@ -197,24 +200,15 @@ namespace Game
 
                 if (GM.GamerStand())
                 {
-                    Console.WriteLine("{0:s} бросил карты!", GM.CurrentGamer.sName);
+                    MainLog.FirstMove(GM.CurrentGamer.sName, null);
                     break;
                 }
-                /*                if (ACard == null)
-                                {
-                                    Console.WriteLine("{0:s}: Принимаю!", Desk.GM.NGamer.sName);
-                                    Desk.GM.NGamer.GetCard(CardOnDesk);
-                                    Desk.AddCards();
-                                }
-                                else
-                                {
-                                    Console.WriteLine("{0:s}: Отбиваю {1:s}!", Desk.GM.NGamer.sName, ACard.ToString());
-                                    Desk.AddCards();
-                                    Desk.GM.GoNextGamer();
-                                }*/
+
                 AddCards();
                 GM.DeleteGamersWhoGameIsDone();
-                Console.WriteLine("Теперь ходит {0:s}", GM.CurrentGamer.sName);
+                if (GameIsDone()) break;
+                MainLog.DisplayCurrentGamer(GM.CurrentGamer.sName);
+
             } while (!GameIsDone());
 
         }

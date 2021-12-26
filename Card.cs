@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Game
 {
-    class TCard
+    public class TCard
     {
         public int iVal;
         public int iMast;
@@ -14,7 +14,7 @@ namespace Game
             iVal = Val;
             iMast = Mast;
         }
-        public string ToString()
+        public override string ToString()
         {
             string S=new string("");
 
@@ -25,14 +25,14 @@ namespace Game
                 case 2: S = " крестей"; break;
                 case 3: S = " виней"; break;
             }
-            switch (iVal)
+            S = (iVal switch
             {
-                case 11: S = "валет" + S; break;
-                case 12: S = "дама" + S; break;
-                case 13: S = "король" + S; break;
-                case 14: S = "туз" + S; break;
-                default: S = iVal.ToString() + S; break;
-            }
+                11 => "валет",
+                12 => "дама",
+                13 => "король",
+                14 => "туз",
+                _ => iVal.ToString(),
+            }) + S;
             return S;
         }
         public bool CanTake(TCard D, int iHigh)
@@ -47,6 +47,6 @@ namespace Game
         {
             return CardsOnDesk.CanSecond(this, iHigh);
         }
-        public bool isHigh(int iHigh) { return iHigh == iMast; }
+        public bool IsHigh(int iHigh) { return iHigh == iMast; }
     }
 }

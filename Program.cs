@@ -4,28 +4,50 @@ namespace Game
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            int iMoveCount = 0;
-            TCard ACard;
+            TLog MainLog = new TLog(0);
 
-            Console.WriteLine("Игра в дурака!");
-            TDesk Desk = new TDesk();
+            TStat Stat = new TStat();
 
-            Desk.AddGamer(new TMan("Джон"));
-            Desk.AddGamer(new TMan("Билл"));
-            Desk.AddGamer(new TSmartMan("Гарри"));
-            Desk.AddGamer(new TMan("Гермиона"));
+            Stat.AddGamerToStat("Джон");
+            Stat.AddGamerToStat("Билл");
+            Stat.AddGamerToStat("Гарри");
+            Stat.AddGamerToStat("Гермиона");
 
-            if (!Desk.GM.GamerStand())
+            for (int iMath = 1;iMath < 1000;iMath++)
             {
-                if (Desk.GM.isGameDone)
-                    Console.WriteLine("{0:s} - проиграл!", Desk.GM.Gamers[0].sName);
+//                int iMoveCount = 0;
+//                TCard ACard;
+
+                MainLog.DisplayMessage("Игра в дурака!");
+
+                TDesk Desk = new TDesk(ref MainLog);
+
+                Desk.AddGamer(new TMan(ref MainLog, "Джон"));
+                Desk.AddGamer(new TMan(ref MainLog, "Билл"));
+                Desk.AddGamer(new TSmartMan(ref MainLog, "Гарри"));
+                Desk.AddGamer(new TSmartMan(ref MainLog, "Гермиона"));
+
+                Desk.GameCycle();
+                if (!Desk.GM.GamerStand())
+                {
+                    if (!Desk.GM.IsEmpty())
+                    {
+                        MainLog.DisplayResult(Desk.GM.Gamers[0].sName);
+                        Stat.GamerInc(Desk.GM.Gamers[0].sName);
+                    }
+                    else
+                        MainLog.DisplayResult(null);
+                }
                 else
-                    Console.WriteLine("Розыгрыш!!!");
+                {
+                    MainLog.DisplayMessage("Игра прервана!");
+                }
             }
-            Desk.GameCycle();
-            Console.WriteLine("Конец программы...");
+
+            MainLog.DisplayMessage(0, Stat.GetStringStat());
+            MainLog.DisplayMessage(0, "Конец программы");
         }
     }
 }

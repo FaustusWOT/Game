@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#nullable enable
 
 namespace Game
 {
-    class TColoda
+    public class TColoda
     {
         //        public TCard[] Data;
         //        public int iCardCount;
@@ -68,13 +69,13 @@ namespace Game
             return GetFrom(Rand.Next(0, Cards.Count));
         }
 
-        public bool isEmpty ()
+        public bool IsEmpty ()
         {
             //            return (iCardCount == 0);
             return (Cards.Count == 0);
         }
 
-        public virtual void DisplayColoda() { }
+        public virtual void DisplayColoda(TLog MainLog) { }
 
         public bool IsCorrectFirstColoda()
         {
@@ -93,7 +94,7 @@ namespace Game
             //            iCardCount = 0;
             Cards.Clear();
         }
-        public int getMinHigh(int iHigh)
+        public int GetMinHigh(int iHigh)
         {
             int iC = 15;
 /*            for (int i=0;i < iCardCount;i++)
@@ -142,7 +143,7 @@ namespace Game
                 }
             }
 
-            return (!SelCards.isEmpty()) ? SelCards : null;
+            return (!SelCards.IsEmpty()) ? SelCards : null;
 
         }
 
@@ -158,11 +159,11 @@ namespace Game
                 }
             }
 
-            return (!SelCards.isEmpty()) ? SelCards : null;
+            return (!SelCards.IsEmpty()) ? SelCards : null;
 
         }
 
-        public int iCardCount { get { return Cards.Count; } }
+        public int CardCount { get { return Cards.Count; } }
 
 
         public bool CanTake(int iIndex,TCard Card,int iHigh)
@@ -181,10 +182,10 @@ namespace Game
                 }
                 else
                 {
-                    if (!C.isHigh(iHigh) & (Card.isHigh(iHigh))) {
+                    if (!C.IsHigh(iHigh) & (Card.IsHigh(iHigh))) {
                         Card = C;
                     }
-                    else if ((C.isHigh(iHigh) & Card.isHigh(iHigh)) | (!C.isHigh(iHigh) & !Card.isHigh(iHigh)))
+                    else if ((C.IsHigh(iHigh) & Card.IsHigh(iHigh)) | (!C.IsHigh(iHigh) & !Card.IsHigh(iHigh)))
                     {
                         if (C.iVal < Card.iVal)
                         {
@@ -195,33 +196,51 @@ namespace Game
             }
             return Card;
         }
+        public TCard this[int i]
+        {
+            get => Cards[i];
+            set => Cards[i] = value; 
+        }
+        public int Count
+        {
+            get => Cards.Count;
+        }
+
+        public MyColodaEnumerator GetEnumerator()
+        {  
+            return new MyColodaEnumerator(this);
+        }
     }
+
+    public class MyColodaEnumerator
+    {
+        int nIndex;
+        readonly TColoda Coloda;
+
+        public MyColodaEnumerator(TColoda coll)
+        {
+            Coloda = coll;
+            nIndex = 0;
+        }
+
+        public bool MoveNext()
+        {
+            nIndex++;
+            return (nIndex < Coloda.Count);
+        }
+
+        public TCard Current => Coloda[nIndex];
+    }
+
+
 
     class TMainColoda : TColoda
     {
-        public override void DisplayColoda()
+        public override void DisplayColoda(TLog MainLog)
         {
-//            base.DisplayColoda();
-            
-            if (!isEmpty())
-            {
-                Console.WriteLine("Козырь : " + Cards[0].ToString());
-
-                Console.WriteLine("Колода ");
-
-                switch (Cards.Count)
-                {
-                    case 1: Console.WriteLine("Одна карта "); break;
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 5: Console.WriteLine("несколько карт "); break;
-                    default: Console.WriteLine("много карт "); break;
-                }
-
-            } else Console.WriteLine("Колода пуста");
-
+            MainLog.DisplayColoda(TColodaType.IS_DESK_COLODA, this);
         }
+
         public int GetHigh()
         {
             return Cards[0].iMast;
@@ -268,57 +287,17 @@ namespace Game
 
     class TManColoda : TColoda
     {
-        public override void DisplayColoda()
+        public override void DisplayColoda(TLog MainLog)
         {
-            if (!isEmpty())
-            {
-                Console.WriteLine("Колода ");
-
-                for (int i = 0; i < Cards.Count; i++) Console.WriteLine((i + 1).ToString() + " " + Cards[i].ToString());
-
-            }
-            else Console.WriteLine("Карт нет.");
-/*            if (!isEmpty())
-            {
-                Console.WriteLine("Колода ");
-
-                string S = "";
-
-                foreach (TCard Card in Cards) S += "#";
-
-                Console.WriteLine(S);
-            }
-            else Console.WriteLine("Карт нет.");*/
-
+            MainLog.DisplayColoda(TColodaType.IS_CLOSE_COLODA, this);
         }
     }
 
     class THumanColoda : TColoda
     {
-        public override void DisplayColoda()
+        public override void DisplayColoda(TLog MainLog)
         {
-/*            base.DisplayColoda();
-
-            if (iCardCount > 0)
-            {
-                Console.WriteLine("Колода ");
-
-                for (int i = 0; i < iCardCount; i++) Console.WriteLine((i+1).ToString() + " " + Data[i].ToString());
-
-            }
-            else Console.WriteLine("Карт нет.");*/
-
-//            base.DisplayColoda();
-
-            if (!isEmpty())
-            {
-                Console.WriteLine("Колода ");
-
-                for (int i = 0; i < Cards.Count; i++) Console.WriteLine((i + 1).ToString() + " " + Cards[i].ToString());
-
-            }
-            else Console.WriteLine("Карт нет.");
-
+            MainLog.DisplayColoda(TColodaType.IS_OPEN_COLODA, this);
         }
 
     }

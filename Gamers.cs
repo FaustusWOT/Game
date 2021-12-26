@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#nullable enable
 
 namespace Game
 {
     class TGamers
     {
+        private readonly TLog MainLog;
+
         public int iCurrent;
         public List<TGamer> Gamers;
 //        public int iGamersCount;
 
-        public TGamers()
+        public TGamers(ref TLog setMainLog)
         {
+            MainLog = setMainLog;
+
             Gamers = new List<TGamer>();
             iCurrent = 0;
         }
@@ -38,7 +43,6 @@ namespace Game
         public void GoNextGamer()
         {
             iCurrent = NextGamer();
-//            Console.WriteLine("Теперь ходит {0:s}", CurrentGamer.sName);
         }
 
         public bool GameIsDone()
@@ -54,14 +58,13 @@ namespace Game
                 {
                     if (i != iCurrent)
                     {
-                        Console.WriteLine("Игрок {0:s}", Gamers[i].sName);
-                        Gamers[i].DisplayColoda();
+                        MainLog.DisplayPosition(String.Format("Игрок {0:s}", Gamers[i].sName),Gamers[i]);
                     } 
                 }
             } else
             {
-                Console.WriteLine("Текущий игрок ({0:s}):",CurrentGamer.sName);
-                CurrentGamer.DisplayColoda();
+                MainLog.DisplayPosition(String.Format("Текущий игрок ({0:s}):",CurrentGamer.sName),CurrentGamer);
+//                CurrentGamer.DisplayColoda();
             }
         }
 
@@ -85,7 +88,7 @@ namespace Game
             int iIndex;
             while ((iIndex = Gamers.FindIndex(x => x.GameIsDone())) >= 0) 
             {
-                Console.WriteLine("Игрок {0:s} вышел!", Gamers[iIndex].sName);
+                MainLog.GamerStand(Gamers[iIndex].sName);
                 RemoveGamer(iIndex);
             }
 
@@ -107,8 +110,8 @@ namespace Game
 
             foreach (TGamer Gamer in Gamers) 
             {
-                iT = Gamer.getMinHigh(iHigh);
-                Console.WriteLine("{0:s} сказал \"У меня {1:d}!", Gamer.sName, iT);
+                iT = Gamer.GetMinHigh(iHigh);
+                MainLog.GamerSay(Gamer.sName, iT.ToString());
 
                 if (iT < iV)
                 {
@@ -119,14 +122,18 @@ namespace Game
 
             if (iV < 15)
             {
-                iCurrent = Gamers.FindIndex(x => (x.sName == iC.sName));
-                Console.WriteLine("Ходит {0:s}, у него {1:d}!", CurrentGamer.sName, iV);
+                iCurrent = Gamers.FindIndex(x => (x.sName == iC!.sName));
+                MainLog.FirstMoveGamer(CurrentGamer.sName, iV.ToString());
             }
 
         }
-        public bool isGameDone
+        public bool IsGameDone
         {
             get { return (Gamers.Count <= 1); }
+        }
+        public bool IsEmpty()
+        {
+            return Gamers.Count == 0;
         }
 
         public void GetNeedCards(TColoda Coloda)
@@ -135,7 +142,12 @@ namespace Game
             {
                 for (int i = 0; i < Gamers.Count; i++)
                 {
-                    while (CurrentGamer.NeedCard() && !(Coloda.isEmpty())) CurrentGamer.GetCard(Coloda.GetLast());
+                    while (CurrentGamer.NeedCard() && !(Coloda.IsEmpty()))
+                    {
+                        TCard? ACard = Coloda.GetLast();
+                        if (ACard != null)
+                            CurrentGamer.GetCard(ACard);
+                    }
 
                     GoNextGamer();
                 }

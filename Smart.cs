@@ -1,36 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#nullable enable
 
 namespace Game
 {
     class TSmartMan : TMan
     {
-        public TSmartMan(string pName) : base(pName) { }
+        public TSmartMan(ref TLog setMainLog,string pName) : base(ref setMainLog,pName) { }
 
-        public override TCard GetFirstMove(int iHigh)
+        public override TCard? GetFirstMove(int iHigh)
         {
-            return Cards.GetFrom(Cards.SelectMinCard(iHigh));
+            return Cards!.GetFrom(Cards.SelectMinCard(iHigh));
         }
 
-        public override TCard GetSecondMove(TColoda CardsOnDesk, int iHigh)
+        public override TCard? GetSecondMove(TColoda CardsOnDesk, int iHigh)
         {
-            Random rand = new Random();
 
-            TColoda? SelCards = Cards.GetSecondMoveCards(CardsOnDesk, iHigh);
+            TColoda? SelCards = Cards!.GetSecondMoveCards(CardsOnDesk, iHigh);
 
-            TCard? SelCard = (SelCards != null) ? SelCards.SelectMinCard(iHigh) : null;
+            TCard? SelCard = SelCards?.SelectMinCard(iHigh);
 
             return Cards.GetFrom(SelCard);
         }
 
-        public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
+        public override TCard? GetAnsverMove(TCard DeskCard, int iHigh)
         {
-            Random rand = new Random();
 
-            TColoda? SelCards = Cards.GetAnsverMoveCards(DeskCard, iHigh);
+            TColoda? SelCards = Cards!.GetAnsverMoveCards(DeskCard, iHigh);
 
-            TCard? SelCard = (SelCards != null) ? SelCards.SelectMinCard(iHigh) : null;
+            TCard? SelCard = SelCards?.SelectMinCard(iHigh);
 
             return Cards.GetFrom(SelCard);
 

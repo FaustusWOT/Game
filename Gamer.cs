@@ -1,78 +1,82 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#nullable enable
 
 namespace Game
 {
-    abstract class TGamer
+    public abstract class TGamer
     {
-        public TColoda Cards;
+        protected TLog MainLog;
+
+        public TColoda? Cards;
         public bool ThrowCards;
         public string sName;
 
-        public TGamer(string pName)
+        public TGamer(ref TLog setMainLog,string pName)
         {
             sName = pName;
             ThrowCards = false;
+            MainLog = setMainLog;
         }
 
         public void GetCard(TCard Card)
         {
             DisplayTakenCard(Card);
-            Cards.PutIn(Card);
+            Cards!.PutIn(Card);
         }
 
-        public abstract void DisplayTakenCard(TCard TakenCard);
-        public abstract TCard GetFirstMove(int iHigh);
-        public abstract TCard GetSecondMove(TColoda CardsOnDesk, int iHigh);
-        public abstract TCard GetAnsverMove(TCard DeskCard, int iHigh);
+        public abstract void DisplayTakenCard(TCard? TakenCard);
+        public abstract TCard? GetFirstMove(int iHigh);
+        public abstract TCard? GetSecondMove(TColoda CardsOnDesk, int iHigh);
+        public abstract TCard? GetAnsverMove(TCard DeskCard, int iHigh);
 
 
         public bool GameIsDone ()
         {
-            return (Cards.isEmpty());
+            return (Cards!.IsEmpty());
         }
 
         public bool NeedCard()
         {
-            return Cards.NeedCard();
+            return Cards!.NeedCard();
         }
 
         public void DisplayColoda()
         {
-            Cards.DisplayColoda();
+            Cards!.DisplayColoda(MainLog);
         }
         public bool IsCorrectFirstColoda()
         {
-            return Cards.IsCorrectFirstColoda();
+            return Cards!.IsCorrectFirstColoda();
         }
 
         public void DoEmptyHands()
         {
-            Cards.DoEmpty();
+            Cards!.DoEmpty();
         }
-        public int getMinHigh(int iHigh)
+        public int GetMinHigh(int iHigh)
         {
-            return Cards.getMinHigh(iHigh);
+            return Cards!.GetMinHigh(iHigh);
         }
         public void GetCards(TColoda Coloda)
         {
-            Cards.GetCards(Coloda);
+            Cards!.GetCards(Coloda);
         }
     }
 
     class TMan : TGamer
     {
-        public TMan(string pName) : base(pName)
+        public TMan(ref TLog setMainLog,string pName) : base(ref setMainLog,pName)
         {
             Cards = new TManColoda();
         }
-        public override TCard GetFirstMove(int iHigh)
+        public override TCard? GetFirstMove(int iHigh)
         {
-            return Cards.GetRandomCard();
+            return Cards!.GetRandomCard();
         }
 
-        public override TCard GetSecondMove(TColoda CardsOnDesk,int iHigh)
+        public override TCard? GetSecondMove(TColoda CardsOnDesk,int iHigh)
         {
             /*            TColoda SelCards = new TColoda();
                         int iCount = 0;
@@ -94,16 +98,15 @@ namespace Game
                             Random rand = new Random();
                             return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
                         }*/
-            Random rand = new Random();
 
-            TColoda? SelCards = Cards.GetSecondMoveCards(CardsOnDesk, iHigh);
+            TColoda? SelCards = Cards!.GetSecondMoveCards(CardsOnDesk, iHigh);
 
-            TCard? SelCard = (SelCards != null)?SelCards.GetRandomCard():null;
+            TCard? SelCard = SelCards?.GetRandomCard();
 
-            return Cards.GetFrom(SelCard);
+            return Cards!.GetFrom(SelCard);
         }
 
-        public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
+        public override TCard? GetAnsverMove(TCard DeskCard, int iHigh)
         {
             /*            int[] SelCards = new int[52];
                         int iCount = 0;
@@ -125,66 +128,35 @@ namespace Game
                             return Cards.GetFrom(SelCards[rand.Next(0, iCount)]);
                         }
             */
-            Random rand = new Random();
 
-            TColoda? SelCards = Cards.GetAnsverMoveCards(DeskCard, iHigh);
+            TColoda? SelCards = Cards!.GetAnsverMoveCards(DeskCard, iHigh);
 
-            TCard? SelCard = (SelCards != null) ? SelCards.GetRandomCard() : null;
+            TCard? SelCard = SelCards?.GetRandomCard();
 
             return Cards.GetFrom(SelCard);
 
         }
-        public override void DisplayTakenCard(TCard TakenCard)
+        public override void DisplayTakenCard(TCard? TakenCard)
         {
-            Console.WriteLine("Взял 1 карту...");
+            MainLog.TakeOneCard(sName,"1 карту");
         }
     }
 
     class THuman : TGamer
     {
-        public THuman (string pName) : base(pName)
+        public THuman (ref TLog setMainLog,string pName) : base(ref setMainLog,pName)
         {
             Cards = new THumanColoda();
         }
 
         private int? GetHumanEnter()
         {
-            int i;
-            Cards.DisplayColoda();
-            do
-            {
-                string S = Console.ReadLine();
-                if ((S.ToUpper() == "QUIT") || (S.ToUpper() == "EXIT") || (S.ToUpper() == "STOP")) return null;
+            Cards!.DisplayColoda(MainLog);
 
-                try
-                {
-                    i = int.Parse(S);
-                    if (i < 0)
-                    {
-                        Console.WriteLine("Чиско не должно быть отрицательным!");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error {0:S}. Try again!", e.Message);
-                    i = -1;
-                }
-
-                if (i > 0)
-                {
-                    if (i > Cards.iCardCount)
-                    {
-                        Console.WriteLine("Число должно быть от 0 (нечем ходить) до {0:d}", Cards.iCardCount);
-                        i = -1;
-                    }
-                }
-
-            } while (i < 0);
-
-            return i;
+            return MainLog.ReadUserInput("Укажите номер карты : ", Cards.CardCount);
         }
 
-        public override TCard GetFirstMove(int iHigh)
+        public override TCard? GetFirstMove(int iHigh)
         {
             int? i = GetHumanEnter();
 
@@ -194,9 +166,9 @@ namespace Game
                 return null;
             }
 
-            return (i > 0) ? Cards.GetFrom(i.Value - 1) : null;
+            return (i > 0) ? Cards!.GetFrom(i.Value - 1) : null;
         }
-        public override TCard GetSecondMove(TColoda CardsOnDesk,int iHigh)
+        public override TCard? GetSecondMove(TColoda CardsOnDesk,int iHigh)
         {
             int? i = GetHumanEnter();
 
@@ -205,13 +177,13 @@ namespace Game
                 ThrowCards = true;
                 return null;
             }
-            TCard ACard = (i > 0) ? Cards.GetFrom(i.Value - 1) : null;
+            TCard? ACard = (i > 0) ? Cards!.GetFrom(i.Value - 1) : null;
             if (ACard == null) return null;
 
             return (CardsOnDesk.CanSecond(ACard, iHigh)) ? ACard : null; 
         }
 
-        public override TCard GetAnsverMove(TCard DeskCard, int iHigh)
+        public override TCard? GetAnsverMove(TCard DeskCard, int iHigh)
         {
             int? iIndex = GetHumanEnter();
 
@@ -222,7 +194,7 @@ namespace Game
             }
             if (iIndex == 0) return null;
 
-            if (Cards.CanTake(iIndex.Value,DeskCard, iHigh))
+            if (Cards!.CanTake(iIndex.Value,DeskCard, iHigh))
             {
                 return Cards.GetFrom(iIndex.Value-1);
             }
@@ -232,9 +204,9 @@ namespace Game
             }
         }
 
-        public override void DisplayTakenCard(TCard TakenCard)
+        public override void DisplayTakenCard(TCard? TakenCard)
         {
-            Console.WriteLine("Взял {0:s}",TakenCard.ToString());
+            MainLog.TakeOneCard(sName,TakenCard!.ToString());
         }
     }
 }
